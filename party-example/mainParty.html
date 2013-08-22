@@ -1,0 +1,30 @@
+<html>
+<body>
+<script>
+    function startGreeting(src) {
+        src.postMessage({
+            type: "guestsToGreet",
+            msg : [ "Jim", "Burke", "Derick", "Brandon", "TJ" ]
+        });
+    }
+
+    function processMessage(type, msg, source) {
+        switch(type) {
+            case 'greeterReady':
+                startGreeting(source);
+                break;
+            case 'greeting':
+                console.log(msg);
+                break;
+        }
+    }
+
+    var worker = new Worker('greeter.js');
+    worker.onmessage = function (e) {
+        console.dir(e);
+        processMessage(e.data.type, e.data.msg, worker);
+    };
+    worker.postMessage();
+</script>
+</body>
+</html>

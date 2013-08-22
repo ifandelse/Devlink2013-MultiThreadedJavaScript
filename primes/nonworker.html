@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+        }
+    </style>
+    <title>No Worker - Prime Calculator</title>
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/primes.js"></script>
+    <script>
+        var running = false;
+        var $startPrimes;
+        $(function(){
+            $startPrimes = $("#startPrimes");
+
+            primes.addListener(function(msg){
+                $("#results").prepend("<div>" + msg + "</div>");
+            });
+            $startPrimes.on("click", function() {
+                running = !running;
+                $startPrimes.val(running ? "Stop Calculation" : "Calculate Primes");
+                if(running) {
+                    $("#results" ).prepend("<div>STARTING...</div>");
+                    primes.compute(1);
+                } else {
+                    $("#results" ).prepend("<div>STOPPING...</div>");
+                    primes.stop();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <div>
+            <textarea cols="50" rows="10"></textarea>
+        </div>
+        <input type="button" id="startPrimes" value="Calculate Primes" />
+    </div>
+    <div id="results"></div>
+</body>
+</html>

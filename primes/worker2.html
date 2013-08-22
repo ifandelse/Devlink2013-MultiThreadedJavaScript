@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        body {
+            font-family: Helvetica,Arial,sans-serif;
+            font-size: 12pt;
+        }
+
+        #status {
+            color: steelblue;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="css/animate.min.css">
+    <title>Inline Worker - Prime Calculator</title>
+    <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/jquery.lettering.js"></script>
+    <script src="js/jquery.textillate.js"></script>
+    <script src="js/primes.js"></script>
+    <script type="text/js-worker" id="worker">
+        // url must be absolute path in an inline worker
+        importScripts("http://localhost:8887/primes/js/primes.js");
+
+        primes.addListener(function(msg){
+            postMessage(msg);
+        });
+
+        addEventListener("message", function(e){
+            if( e.data && e.data.cmd) {
+                switch( e.data.cmd) {
+                    case 'start' :
+                        primes.compute( e.data.startVal );
+                    break;
+                    case 'stop' :
+                        primes.stop();
+                    break;
+                    default:
+                        postMessage("Invalid command...");
+                    break;
+                }
+            }
+        });
+    </script>
+    <script>
+        var running = false, $startPrimes, $status, $results, $animatedSt, worker;
+        $(function(){
+            $startPrimes = $("#startPrimes");
+            $status      = $("#status");
+            $results     = $("#results");
+            $animatedSt  = $("#animated-status");
+
+            function getBtnText() {
+                return running ? "Stop Calculation" : "Calculate Primes";
+            }
+
+            function setForRun() {
+                running = true;
+                $startPrimes.val(getBtnText());
+                $status.html("");
+                $results.html("");
+                $animatedSt.show().textillate({
+                    initialDelay: 0,
+                    autoStart: true,
+                    loop: true
+                });
+            }
+
+            function setForStop() {
+                running = false;
+                $animatedSt.hide();
+                $startPrimes.val(getBtnText());
+                $status.textillate({ in: { effect: 'shake' } });
+            }
+
+            var blob = new Blob([document.querySelector('#worker').textContent]);
+
+            var worker = new Worker(window.URL.createObjectURL(blob));
+            worker.onmessage = function(e){
+                switch( e.data ) {
+                    case 'Stopped':
+                        setForStop();
+                        $status.html(e.data);
+                        break;
+                    case 'Starting':
+                        if(running) {
+                            $status.html(e.data);
+                        }
+                        break;
+                    default:
+                        if(running) {
+                            if($status.html() !== "Calculating") {
+                                $status.html("Calculating");
+                            }
+                            $results.html(e.data);
+                        }
+                        break;
+                }
+            };
+
+            $startPrimes.on("click", function() {
+                if(!running) {
+                    setForRun();
+                    worker.postMessage({ cmd: "start", startVal: 1 });
+                } else {
+                    worker.postMessage({ cmd: "stop" });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div>
+    <div>
+        <textarea cols="50" rows="10"></textarea>
+    </div>
+    <input type="button" id="startPrimes" value="Calculate Primes" />
+</div>
+<h2 id="status"></h2>
+<ul style="display:none;" id="animated-status" data-in-effect="flip" data-out-effect="hinge">
+    <li>The load of calculating prime numbers has been moved to a Worker.</li>
+    <li>Animations work because UI thread is not blocked...</li>
+</ul>
+<h2 id="results"></h2>
+</body>
+</html>
