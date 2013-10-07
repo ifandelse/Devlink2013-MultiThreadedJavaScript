@@ -16,7 +16,6 @@
     <script src="js/jquery-1.10.2.min.js"></script>
     <script src="js/jquery.lettering.js"></script>
     <script src="js/jquery.textillate.js"></script>
-    <script src="js/primes.js"></script>
     <script>
         var running = false, $startPrimes, $status, $results, $animatedSt, worker;
         $(function(){
@@ -69,6 +68,9 @@
                         }
                     break;
                 }
+            };
+            worker.onerror = function(e) {
+                alert( e.message );
             };
 
             $startPrimes.on("click", function() {

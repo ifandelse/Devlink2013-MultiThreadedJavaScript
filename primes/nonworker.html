@@ -11,22 +11,22 @@
     <script src="js/jquery-1.10.2.min.js"></script>
     <script src="js/primes.js"></script>
     <script>
-        var running = false;
-        var $startPrimes;
+        var running = false, $startPrimes, $results;
         $(function(){
             $startPrimes = $("#startPrimes");
+            $results = $("#results");
 
             primes.addListener(function(msg){
-                $("#results").prepend("<div>" + msg + "</div>");
+                $results.prepend("<div>" + msg + "</div>");
             });
             $startPrimes.on("click", function() {
                 running = !running;
                 $startPrimes.val(running ? "Stop Calculation" : "Calculate Primes");
                 if(running) {
-                    $("#results" ).prepend("<div>STARTING...</div>");
+                    $results.prepend("<div>STARTING...</div>");
                     primes.compute(1);
                 } else {
-                    $("#results" ).prepend("<div>STOPPING...</div>");
+                    $results.prepend("<div>STOPPING...</div>");
                     primes.stop();
                 }
             });

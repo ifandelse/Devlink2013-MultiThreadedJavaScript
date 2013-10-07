@@ -19,7 +19,7 @@
     <script src="js/primes.js"></script>
     <script type="text/js-worker" id="worker">
         // url must be absolute path in an inline worker
-        importScripts("http://localhost:8887/primes/js/primes.js");
+        importScripts("http://localhost:8888/primes/js/primes.js");
 
         primes.addListener(function(msg){
             postMessage(msg);
@@ -75,7 +75,7 @@
             var blob = new Blob([document.querySelector('#worker').textContent]);
 
             var worker = new Worker(window.URL.createObjectURL(blob));
-            worker.onmessage = function(e){
+            worker.addEventListener("message", function(e){
                 switch( e.data ) {
                     case 'Stopped':
                         setForStop();
@@ -95,7 +95,11 @@
                         }
                         break;
                 }
-            };
+            });
+
+            worker.addEventListener("error", function(e) {
+                alert( e.message );
+            });
 
             $startPrimes.on("click", function() {
                 if(!running) {
